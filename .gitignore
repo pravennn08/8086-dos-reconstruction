@@ -1,0 +1,21 @@
+# Generated output and locally cached third-party tools
+/build/
+/.local/
+/tools/tasm/
+*.obj
+*.lst
+*.map
+*.tds
+*.bak
+
+# A target can be included later when its distribution terms are recorded.
+/target/*.com
+/target/*.exe
+
+# Extension logs and local configuration
+*.log
+dosasm*.txt
+*.local.json
+__pycache__/
+.DS_Store
+Thumbs.db

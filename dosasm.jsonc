@@ -1,0 +1,21 @@
+{
+  "action": {
+    "before": [
+      "mount c ${actionFolder}",
+      "mount t ${<built-in>/TASM.jsdos}",
+      "path t:\\tasm;z:\\",
+      "c:"
+    ],
+    "open": ["echo Project mounted as C:. Run BUILD.BAT to build."],
+    "run": [
+      "build.bat",
+      "if exist build\\BUILD.OK build\\REBUILD.COM"
+    ],
+    "debug": [
+      "build.bat",
+      "if exist build\\BUILD.OK td build\\REBUILD.COM"
+    ],
+    "copyFileAs": null,
+    "ignore": [".git", ".local", ".vscode", "node_modules"]
+  }
+}
