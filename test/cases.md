@@ -1,31 +1,28 @@
-# Test cases
+# Verification cases
 
-## Setup smoke check
+## Setup regression
 
-Run `scripts/dev.ps1 -Action verify`, or the VS Code **DOS: Verify setup** task.
+`scripts/dev.ps1 -Action smoke` builds src/smoke.asm and checks the original
+two-line banner and DOS exit code zero. This is also DOS: Verify setup.
 
-| ID | Check | Expected |
-| --- | --- | --- |
-| S-001 | Assemble and link src/rebuild.asm | TASM/TLINK succeed; build/REBUILD.COM exists |
-| S-002 | Execute the starter program | Two exact banner lines from README |
-| S-003 | Program termination | DOS process exit code 0 |
+## Guided encoder comparison
 
-This check is specific to the initial scaffold. Replace it with target-based
-comparisons when the reconstruction behavior is implemented.
+`scripts/dev.ps1 -Action verify` builds the reconstruction and runs both
+executables with the same input. Reference identity must match metadata.json.
 
-## Original vs reconstruction (pending)
+Each case checks identical stdout bytes, zero exit codes, empty stderr,
+and an independently calculated expected encoded result.
 
-First record expected behavior by running the original, then compare the
-reconstruction with identical inputs and environment.
+- E-001: empty input; zero-count loop guard.
+- E-002/E-003: ABC and repeated characters.
+- E-004..E-009: upper/lowercase, spaces, dollar signs, punctuation, and digits.
+- E-010/E-011: exactly 64 characters, including varied data.
+- E-012/E-013: 65 and 128 characters; verify the 64-character limit.
+- E-014/E-015: all printable ASCII characters split into accepted-size inputs.
+- E-016..E-031: deterministic generated inputs, seed 8086.
 
-| ID | Input/condition | Original result | Reconstruction result | Status |
-| --- | --- | --- | --- | --- |
-| R-001 | Empty input | Pending | Pending | Not run |
-| R-002 | One character | Pending | Pending | Not run |
-| R-003 | Mixed text | Pending | Pending | Not run |
-| R-004 | Spaces/punctuation | Pending | Pending | Not run |
-| R-005 | Observed maximum input length | Pending | Pending | Not run |
-| R-006 | Input beyond that limit | Pending | Pending | Not run |
+Executed outcomes: [encoder-results.md](encoder-results.md).
+Raw byte evidence: [encoder-results.json](encoder-results.json).
 
-Include output bytes, prompts, line endings, and exit behavior where relevant.
-Tests must reflect the selected target's actual interface.
+Interactive editing keys, Ctrl-C, code-page changes, and arbitrary binary
+input are outside this set. GUI execution is not automated by these tests.

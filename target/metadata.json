@@ -1,0 +1,39 @@
+{
+  "name": "ENCODE.COM",
+  "size_bytes": 271,
+  "sha256": "2028290647ca744d2aea1ee810f812f5e9b91cbb8512f2c10ab7e108b28fa1af",
+  "assumed_load_offset": "0x100",
+  "first_64_bytes_hex": "0e 1f ba 79 01 b4 09 cd 21 ba 8c 01 b4 09 cd 21 ba cc 01 b4 0a cd 21 33 c9 8a 0e cd 01 bb ce 01 e3 06 80 37 2a 43 e2 fa ba ad 01 b4 09 cd 21 33 c9 8a 0e cd 01 be ce 01 e3 11 8a 04 e8 18 00 46",
+  "ascii_strings": [
+    {
+      "file_offset": 86,
+      "dos_offset": "0x156",
+      "text": "!PSQR"
+    },
+    {
+      "file_offset": 115,
+      "dos_offset": "0x173",
+      "text": "!ZY[X"
+    },
+    {
+      "file_offset": 121,
+      "dos_offset": "0x179",
+      "text": "8086 DOS Encoder"
+    },
+    {
+      "file_offset": 139,
+      "dos_offset": "0x18b",
+      "text": "$Enter text (max 64 characters): $"
+    },
+    {
+      "file_offset": 175,
+      "dos_offset": "0x1af",
+      "text": "Encoded: $"
+    },
+    {
+      "file_offset": 187,
+      "dos_offset": "0x1bb",
+      "text": "$0123456789ABCDEFA"
+    }
+  ]
+}

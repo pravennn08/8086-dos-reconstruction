@@ -1,6 +1,6 @@
 [CmdletBinding()]
 param(
-    [ValidateSet('check', 'build', 'run', 'verify', 'debug')]
+    [ValidateSet('check', 'build', 'run', 'verify', 'debug', 'target', 'inspect', 'smoke')]
     [string]$Action = 'check',
     [string]$TasmDirectory = $env:TASM_DIR,
     [string]$MsdosPlayer = $env:MSDOS_PLAYER,
@@ -39,6 +39,11 @@ function Invoke-DosTool {
 }
 
 try {
+    if ($Action -eq 'inspect') {
+        & python.exe (Join-Path $projectRoot 'scripts\inspect_target.py') --code-end 0x179
+        if ($LASTEXITCODE -ne 0) { throw 'Target inspection failed.' }
+        exit 0
+    }
     if (-not $MsdosPlayer) {
         $MsdosPlayer = Find-ExtensionFile 'xsro.vscode-dosbox' 'emu\msdos_player\win32-x64\msdos.exe'
     }
@@ -98,37 +103,54 @@ try {
         } else {
             Write-Host 'DOSBox-X was not found; set DOSBOX_X before using interactive debugging.'
         }
-        Write-Host 'Build/run tools located. Use -Action verify to compile and execute the smoke program.'
+        Write-Host 'Build/run tools located. Use -Action smoke for setup, or -Action verify for encoder comparison.'
         exit 0
     }
 
+    $stem = 'REBUILD'
+    $source = Join-Path $projectRoot 'src\rebuild.asm'
+    if ($Action -eq 'target') {
+        $stem = 'ENCODE'
+        $source = Join-Path $projectRoot 'target\source\encode.asm'
+    } elseif ($Action -eq 'smoke') {
+        $stem = 'SMOKE'
+        $source = Join-Path $projectRoot 'src\smoke.asm'
+    }
     New-Item -ItemType Directory -Path $buildDirectory -Force | Out-Null
     # Clear only these known generated files; never recursively remove directories.
-    foreach ($name in @('REBUILD.COM', 'REBUILD.OBJ', 'REBUILD.LST', 'BUILD.OK', 'SMOKE.TXT')) {
+    $generatedNames = @("${stem}.COM", "${stem}.OBJ", "${stem}.LST", "${stem}.MAP")
+    if ($stem -eq 'REBUILD') { $generatedNames += 'BUILD.OK' }
+    foreach ($name in $generatedNames) {
         $generatedFile = Join-Path $buildDirectory $name
         if (Test-Path -LiteralPath $generatedFile) {
             Remove-Item -LiteralPath $generatedFile -Force
         }
     }
-    Copy-Item -LiteralPath (Join-Path $projectRoot 'src\rebuild.asm') -Destination (Join-Path $buildDirectory 'REBUILD.ASM')
+    Copy-Item -LiteralPath $source -Destination (Join-Path $buildDirectory ($stem + '.ASM'))
     Push-Location $buildDirectory
     try {
-        Invoke-DosTool $assembler @('/m2', '/l', 'REBUILD.ASM')
-        Invoke-DosTool $linker @('/t', 'REBUILD.OBJ')
-        $program = Join-Path $buildDirectory 'REBUILD.COM'
+        Invoke-DosTool -Executable $assembler -ToolArguments @('/m2', '/l', ($stem + '.ASM'))
+        Invoke-DosTool -Executable $linker -ToolArguments @('/t', ($stem + '.OBJ'))
+        $program = Join-Path $buildDirectory ($stem + '.COM')
         if (-not (Test-Path -LiteralPath $program -PathType Leaf)) {
-            throw 'The linker did not create REBUILD.COM.'
+            throw ('The linker did not create ' + $stem + '.COM.')
         }
         $size = (Get-Item -LiteralPath $program).Length
         if ($size -le 0 -or $size -gt 65278) {
             throw ('Unexpected COM image size: ' + $size)
         }
-        Set-Content -LiteralPath (Join-Path $buildDirectory 'BUILD.OK') -Value 'Build successful.' -Encoding ASCII
-        Write-Host ('Built build\REBUILD.COM ({0} bytes).' -f $size)
+        if ($stem -eq 'REBUILD') {
+            Set-Content -LiteralPath (Join-Path $buildDirectory 'BUILD.OK') -Value 'Build successful.' -Encoding ASCII
+        }
+        Write-Host ('Built build\{0}.COM ({1} bytes).' -f $stem, $size)
+        if ($Action -eq 'target') {
+            Copy-Item -LiteralPath $program -Destination (Join-Path $projectRoot 'target\ENCODE.COM')
+            Write-Host 'Updated disclosed training target. Run -Action inspect and review provenance before comparing.'
+        }
 
         if ($Action -eq 'run') {
             Invoke-DosTool $program @()
-        } elseif ($Action -eq 'verify') {
+        } elseif ($Action -eq 'smoke') {
             $output = @(& $MsdosPlayer $program)
             if ($LASTEXITCODE -ne 0) {
                 throw ('Smoke program returned code ' + $LASTEXITCODE)
@@ -141,6 +163,9 @@ try {
             Set-Content -LiteralPath (Join-Path $buildDirectory 'SMOKE.TXT') -Value $actual -Encoding ASCII
             Write-Host $actual
             Write-Host 'PASS: TASM assembly, TLINK COM linking, exact banner output, and DOS exit code zero.'
+        } elseif ($Action -eq 'verify') {
+            & python.exe (Join-Path $projectRoot 'scripts\test_encoder.py') --runner $MsdosPlayer
+            if ($LASTEXITCODE -ne 0) { throw 'Encoder comparison failed. Review test/encoder-results.md.' }
         }
     } finally {
         Pop-Location

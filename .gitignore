@@ -19,3 +19,11 @@ dosasm*.txt
 __pycache__/
 .DS_Store
 Thumbs.db
+
+# Authored training fixture is redistributable under target/LICENSE.md.
+!/target/ENCODE.COM
+# Generated files from GUI Turbo Assembler
+/src/*.exe
+/src/*.com
+/target/source/*.exe
+/target/source/*.com
