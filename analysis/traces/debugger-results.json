@@ -1,0 +1,95 @@
+{
+  "captured_at_utc": "2026-10-04T01:26:51.647341+00:00",
+  "reference_sha256": "2028290647ca744d2aea1ee810f812f5e9b91cbb8512f2c10ab7e108b28fa1af",
+  "backend": "DOSBox-X bundled DOS DEBUG; real executable loaded and stepped",
+  "input_setup": "DEBUG seeds DS:01CC and sets IP=0117, immediately after the DOS input call. The keyboard-read call and startup printing are skipped in this controlled trace.",
+  "scope": "Runtime XOR, loop count, empty-input branch, formatting, and normal exit. Interactive keyboard entry is captured separately in turbo-session.json and screenshots.",
+  "cases": [
+    {
+      "name": "ABC",
+      "passed": true,
+      "before_xor": {
+        "AX": "0000",
+        "BX": "01CE",
+        "CX": "0003",
+        "DX": "0000",
+        "SP": "FFFE",
+        "BP": "0000",
+        "SI": "0000",
+        "DI": "0000",
+        "DS": "0DF4",
+        "ES": "0DF4",
+        "SS": "0DF4",
+        "CS": "0DF4",
+        "IP": "0122",
+        "flags": "NV UP EI PL ZR NA PE NC",
+        "instruction": "0DF4:0122 80372A            XOR     BYTE PTR [BX],2A                 DS:01CE=41"
+      },
+      "after_xor": {
+        "AX": "0000",
+        "BX": "01CE",
+        "CX": "0003",
+        "DX": "0000",
+        "SP": "FFFE",
+        "BP": "0000",
+        "SI": "0000",
+        "DI": "0000",
+        "DS": "0DF4",
+        "ES": "0DF4",
+        "SS": "0DF4",
+        "CS": "0DF4",
+        "IP": "0125",
+        "flags": "NV UP EI PL NZ NA PO NC",
+        "instruction": "0DF4:0125 43                INC     BX"
+      },
+      "loop_exit": {
+        "AX": "0000",
+        "BX": "01D1",
+        "CX": "0000",
+        "DX": "0000",
+        "SP": "FFFE",
+        "BP": "0000",
+        "SI": "0000",
+        "DI": "0000",
+        "DS": "0DF4",
+        "ES": "0DF4",
+        "SS": "0DF4",
+        "CS": "0DF4",
+        "IP": "0128",
+        "flags": "NV UP EI PL NZ NA PE NC",
+        "instruction": "0DF4:0128 BAAD01            MOV     DX,01AD"
+      },
+      "buffers": [
+        "41 03 41 42 43 0D",
+        "41 03 6B 42 43 0D",
+        "41 03 6B 68 69 0D"
+      ],
+      "raw_sha256": "b3785f0551b984c93084bc91dd62a93bf6435a49b7065e2a97c55be8489f06f4",
+      "raw_file": "debugger-abc.txt"
+    },
+    {
+      "name": "empty",
+      "passed": true,
+      "loop_exit": {
+        "AX": "0000",
+        "BX": "01CE",
+        "CX": "0000",
+        "DX": "0000",
+        "SP": "FFFE",
+        "BP": "0000",
+        "SI": "0000",
+        "DI": "0000",
+        "DS": "0DF4",
+        "ES": "0DF4",
+        "SS": "0DF4",
+        "CS": "0DF4",
+        "IP": "0128",
+        "flags": "NV UP EI PL ZR NA PE NC",
+        "instruction": "0DF4:0128 BAAD01            MOV     DX,01AD"
+      },
+      "buffer": "41 00 0D 00 00 00",
+      "raw_sha256": "dc51fed1eecd4097909b087eb5b709148263c1adbc5d4c1881986bc6ee4a00a2",
+      "raw_file": "debugger-empty.txt"
+    }
+  ]
+}

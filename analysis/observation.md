@@ -23,5 +23,7 @@ and no trailing separator.
 
 Behavior alone suggests an independent per-byte transformation. The compiled
 instruction at 0122h confirms XOR with the constant 2Ah for this fixture.
-Keyboard-editing and live memory/register observations still require a
-separate GUI debugger session.
+A separate [Turbo Debugger session](traces/turbo-session.md) captured
+keyboard-entered ABC at the XOR breakpoint: IP moved from 0122h to 0125h,
+and DS:01CEh changed from 41h to 6Bh after one step. General keyboard
+editing and Ctrl-C behavior remain unverified.

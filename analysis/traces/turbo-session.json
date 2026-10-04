@@ -1,0 +1,45 @@
+{
+  "backend": "Turbo Debugger 5.0 inside DOSBox-X 0.83.18",
+  "input": "ABC",
+  "input_method": "Keyboard entry; original INT 21h/AH=0Ah executed",
+  "reference_sha256": "2028290647ca744d2aea1ee810f812f5e9b91cbb8512f2c10ab7e108b28fa1af",
+  "single_step": "F7 at CS:0122h; reselected the XOR row afterward to refresh operand display",
+  "before": {
+    "AX": "0A24",
+    "BX": "01CE",
+    "CX": "0003",
+    "DX": "01CC",
+    "SI": "0000",
+    "DI": "0000",
+    "BP": "0000",
+    "SP": "FFFE",
+    "DS": "0F6B",
+    "ES": "0F6B",
+    "SS": "0F6B",
+    "CS": "0F6B",
+    "IP": "0122",
+    "memory_at_DS_01CE": "41"
+  },
+  "after": {
+    "AX": "0A24",
+    "BX": "01CE",
+    "CX": "0003",
+    "DX": "01CC",
+    "SI": "0000",
+    "DI": "0000",
+    "BP": "0000",
+    "SP": "FFFE",
+    "DS": "0F6B",
+    "ES": "0F6B",
+    "SS": "0F6B",
+    "CS": "0F6B",
+    "IP": "0125",
+    "memory_at_DS_01CE": "6B"
+  },
+  "observed_at_utc": "2026-10-04T01:16:13.739Z",
+  "evidence": [
+    "turbo-before-xor.png",
+    "turbo-after-xor.png"
+  ],
+  "method": "Values transcribed from the captured live debugger screens; not calculated as a substitute for execution."
+}

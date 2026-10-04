@@ -2,11 +2,11 @@
 
 # 8086 DOS Reconstruction
 
-[![Assembly (8086)](https://img.shields.io/badge/Assembly-8086-red?style=plastic)](src/rebuild.asm)
-[![PowerShell](https://img.shields.io/badge/PowerShell-build_scripts-5391FE?style=plastic)](scripts/dev.ps1)
-[![Python](https://img.shields.io/badge/Python-inspection_%26_tests-3776AB?style=plastic)](scripts/inspect_target.py)
-[![DOS Batch](https://img.shields.io/badge/Batch-DOS_build_scripts-green?style=plastic)](build.bat)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow?style=plastic)](./LICENSE)
+[![Assembly (8086)](https://img.shields.io/badge/Assembly-8086-red)](src/rebuild.asm)
+[![PowerShell](https://img.shields.io/badge/PowerShell-build_scripts-5391FE)](scripts/dev.ps1)
+[![Python](https://img.shields.io/badge/Python-inspection_%26_tests-3776AB)](scripts/inspect_target.py)
+[![DOS Batch](https://img.shields.io/badge/Batch-DOS_build_scripts-green)](build.bat)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow)](./LICENSE)
 
 </div>
 An 8086 assembly lab for examining a DOS executable, documenting its behavior,
@@ -51,7 +51,7 @@ documented in [target/provenance.md](target/provenance.md).
 | TASM reconstruction                                                   | Built: 250 bytes |
 | Binary identity, strings, and disassembly                             | Recorded         |
 | Execution comparison against the reference and a Python specification | 31/31 passed     |
-| Interactive register and memory trace                                 | Pending          |
+| Interactive register and memory trace | Captured: keyboard-entered ABC |
 | Case study using an initially unfamiliar binary                       | Future work      |
 
 The reference transforms the input buffer in place and uses an `XLAT` lookup
@@ -126,6 +126,9 @@ Task** for these tasks:
 | DOS: Inspect training target | Collect metadata and available disassembly    |
 | DOS: Compare encoder         | Build the reconstruction and run all 31 cases |
 | DOS: Build training target   | Explicitly regenerate the disclosed reference |
+| DOS: Debug training target | Open the reference in Turbo Debugger |
+| DOS: Debug program | Build and debug the reconstruction |
+| DOS: Capture debugger trace | Record and check two controlled CPU traces |
 
 These tasks call the project launcher. The extension's separate Run Assembly
 command is not required for this workflow.
@@ -183,7 +186,7 @@ tools/          Tool configuration guide
 demo/           Demonstration instructions
 ```
 
-## Live debugger (next investigation)
+## Live debugger
 
 A live debugger pauses the running DOS program at a breakpoint and lets you
 execute one CPU instruction at a time while inspecting registers and memory.
@@ -191,10 +194,31 @@ For example, with input `ABC`, stepping over the XOR instruction changes the
 first input byte from `41h` (`A`) to `6Bh`. This provides direct evidence of
 how the encoder transforms its input.
 
-Use Turbo Debugger to step through `target/ENCODE.COM`. For the recorded
-reference hash, break at `CS:0122h`, inspect the input at `DS:01CEh`, and watch
-the XOR instruction change a byte. Record the actual registers and memory
-values in `analysis/traces/`. This interactive trace is still pending.
+Use **Terminal > Run Task > DOS: Debug training target**, or run:
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy RemoteSigned -File .\scripts\dev.ps1 -Action debug-target
+```
+
+The task opens the reference in Turbo Debugger's assembly view. Dismiss the
+expected **Program has no symbol table** notice. In the CPU code pane,
+right-click **Goto**, enter `122h` (relative to `CS`), and press **F2** to set a breakpoint.
+Press **F9**, enter `ABC`, and press Enter. At the breakpoint, `BX=01CEh`,
+`CX=3`, and the operand display shows `DS:01CE=41`. Press **F7** once, then
+select the XOR row again to refresh its operand display: the byte is now
+`6Bh` and `IP=0125h`. **Alt+X** exits Turbo Debugger.
+
+The [captured interactive session](analysis/traces/turbo-session.md) contains
+real before/after screenshots and registers from keyboard-entered `ABC`.
+
+**DOS: Debug program** opens the reconstruction, whose instruction addresses
+and implementation differ from the reference. The breakpoint above applies
+to the pinned reference only.
+
+**DOS: Capture debugger trace** (or `-Action trace`) regenerates
+[two checked CPU traces](analysis/traces/debugger-results.md). That automated
+mode explicitly seeds the input buffer and resumes after the DOS keyboard
+call; its input setup differs from the interactive session.
 
 A later independent case study should begin with an unfamiliar executable,
 record prior source access, and derive its behavior from the binary.

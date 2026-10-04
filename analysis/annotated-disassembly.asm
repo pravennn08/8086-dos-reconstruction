@@ -25,4 +25,5 @@
 ;
 ; Illustrative transition, derived from instruction semantics:
 ; 41h XOR 2Ah = 6Bh ('A' becomes encoded byte 6Bh).
-; A live register/memory transition has not yet been captured with a debugger.
+; A matching live transition is captured in traces/turbo-session.md.
+; Controlled loop and empty-input traces are in traces/debugger-results.md.
