@@ -8,7 +8,7 @@ Verified on 2026-10-04 on Windows using the installed VS Code extension tools.
 | --- | --- |
 | TASM 4.1 assembly | PASS: zero errors and zero warnings |
 | TLINK 7.1.30.1 COM linking | PASS: 58-byte REBUILD.COM |
-| Exact banner output | PASS: the two lines documented in README |
+| Exact banner output | PASS: the two starter lines preserved in src/smoke.asm |
 | DOS process exit code | PASS: 0 |
 | Windows PowerShell launcher syntax | PASS |
 | VS Code task/settings and dosasm JSON | PASS: parsed successfully |
@@ -30,5 +30,17 @@ verified by this console smoke check.
 
 ## Reconstruction compatibility
 
-Status: **not run**. Target selection and algorithm recovery are pending.
-No claim of compatibility with an original binary is made at this stage.
+Status: **31/31 recorded cases passed** against the authored training
+reference. This is a guided comparison with disclosed source; an independent
+case study against an initially unfamiliar binary is still pending.
+
+## Guided encoder milestone
+
+The encoder target and reconstruction are now implemented. See [executed comparison results](encoder-results.md) and [raw input/output evidence](encoder-results.json). The phase-1 report above applies to the preserved smoke program.
+
+
+The updated launcher was also checked with invalid assembly in a separate
+scratch fixture: failed reconstruction and target builds return exit code 1,
+clear stale generated outputs, and preserve unrelated files and the existing
+reference binary. Python syntax, VS Code JSON, evidence hashes, and README
+file links were checked successfully.

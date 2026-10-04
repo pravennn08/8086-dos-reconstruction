@@ -1,0 +1,70 @@
+Linear decode of binary bytes. Embedded data can decode as misleading instructions.
+
+target\ENCODE.COM:     file format binary
+
+
+Disassembly of section .data:
+
+00000100 <.data>:
+ 100:	0e                   	push   cs
+ 101:	1f                   	pop    ds
+ 102:	ba 79 01             	mov    dx,0x179
+ 105:	b4 09                	mov    ah,0x9
+ 107:	cd 21                	int    0x21
+ 109:	ba 8c 01             	mov    dx,0x18c
+ 10c:	b4 09                	mov    ah,0x9
+ 10e:	cd 21                	int    0x21
+ 110:	ba cc 01             	mov    dx,0x1cc
+ 113:	b4 0a                	mov    ah,0xa
+ 115:	cd 21                	int    0x21
+ 117:	33 c9                	xor    cx,cx
+ 119:	8a 0e cd 01          	mov    cl,BYTE PTR ds:0x1cd
+ 11d:	bb ce 01             	mov    bx,0x1ce
+ 120:	e3 06                	jcxz   0x128
+ 122:	80 37 2a             	xor    BYTE PTR [bx],0x2a
+ 125:	43                   	inc    bx
+ 126:	e2 fa                	loop   0x122
+ 128:	ba ad 01             	mov    dx,0x1ad
+ 12b:	b4 09                	mov    ah,0x9
+ 12d:	cd 21                	int    0x21
+ 12f:	33 c9                	xor    cx,cx
+ 131:	8a 0e cd 01          	mov    cl,BYTE PTR ds:0x1cd
+ 135:	be ce 01             	mov    si,0x1ce
+ 138:	e3 11                	jcxz   0x14b
+ 13a:	8a 04                	mov    al,BYTE PTR [si]
+ 13c:	e8 18 00             	call   0x157
+ 13f:	46                   	inc    si
+ 140:	49                   	dec    cx
+ 141:	74 08                	je     0x14b
+ 143:	b2 20                	mov    dl,0x20
+ 145:	b4 02                	mov    ah,0x2
+ 147:	cd 21                	int    0x21
+ 149:	eb ef                	jmp    0x13a
+ 14b:	ba b9 01             	mov    dx,0x1b9
+ 14e:	b4 09                	mov    ah,0x9
+ 150:	cd 21                	int    0x21
+ 152:	b8 00 4c             	mov    ax,0x4c00
+ 155:	cd 21                	int    0x21
+ 157:	50                   	push   ax
+ 158:	53                   	push   bx
+ 159:	51                   	push   cx
+ 15a:	52                   	push   dx
+ 15b:	bb bc 01             	mov    bx,0x1bc
+ 15e:	50                   	push   ax
+ 15f:	b1 04                	mov    cl,0x4
+ 161:	d2 e8                	shr    al,cl
+ 163:	d7                   	xlat   BYTE PTR ds:[bx]
+ 164:	8a d0                	mov    dl,al
+ 166:	b4 02                	mov    ah,0x2
+ 168:	cd 21                	int    0x21
+ 16a:	58                   	pop    ax
+ 16b:	24 0f                	and    al,0xf
+ 16d:	d7                   	xlat   BYTE PTR ds:[bx]
+ 16e:	8a d0                	mov    dl,al
+ 170:	b4 02                	mov    ah,0x2
+ 172:	cd 21                	int    0x21
+ 174:	5a                   	pop    dx
+ 175:	59                   	pop    cx
+ 176:	5b                   	pop    bx
+ 177:	58                   	pop    ax
+ 178:	c3                   	ret    

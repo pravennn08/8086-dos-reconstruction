@@ -1,100 +1,209 @@
+<div align="center">
+
 # 8086 DOS Reconstruction
 
-A reverse-engineering lab for recovering the behavior of a small DOS binary
-and rebuilding it in 8086 assembly with Borland Turbo Assembler (TASM).
+[![Assembly (8086)](https://img.shields.io/badge/Assembly-8086-red?style=plastic)](src/rebuild.asm)
+[![PowerShell](https://img.shields.io/badge/PowerShell-build_scripts-5391FE?style=plastic)](scripts/dev.ps1)
+[![Python](https://img.shields.io/badge/Python-inspection_%26_tests-3776AB?style=plastic)](scripts/inspect_target.py)
+[![DOS Batch](https://img.shields.io/badge/Batch-DOS_build_scripts-green?style=plastic)](build.bat)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow?style=plastic)](./LICENSE)
 
-## Current status
+</div>
+An 8086 assembly lab for examining a DOS executable, documenting its behavior,
+and rebuilding that behavior with Borland Turbo Assembler (TASM).
 
-**Phase 1: development environment and project scaffold.**
+The current example is a console encoder: enter a line of text and receive
+hexadecimal bytes. The project includes a runnable reference, a separate TASM
+implementation, disassembly, and **31 passing execution comparisons**.
 
-`src/rebuild.asm` is a toolchain smoke program. It prints two lines and exits
-successfully. It is not yet a reconstruction of a target. No original binary
-has been selected, and no algorithm has been recovered.
+## What this project solves
 
-The earlier `ABC -> 6B 68 69` XOR encoder example is an illustration, not an
-observed result or a requirement for an unknown target.
+When a small legacy executable has no useful documentation, its inputs,
+outputs, and machine instructions can reveal what it does. This repository
+demonstrates a repeatable process:
 
-## Quick start in VS Code (Windows)
+1. Identify the executable and record its origin and SHA-256 hash.
+2. Run controlled inputs and inspect its 8086 instructions.
+3. Document the transformation and DOS input/output behavior.
+4. Write a reconstruction and compare both executables on the same inputs.
 
-The local launcher can use tools already installed by these extensions:
+For this example, each accepted input byte is XORed with `2Ah` and displayed
+as two uppercase hexadecimal digits:
 
-- **MASM/TASM** (`xsro.masm-tasm`): TASM and TLINK bundle.
-- **vscode-DOSBox** (`xsro.vscode-dosbox`): MS-DOS Player and DOSBox-X.
+| Character | ASCII byte | XOR operation | Output |
+| --------- | ---------- | ------------- | ------ |
+| A         | `41h`      | `41h XOR 2Ah` | `6B`   |
+| B         | `42h`      | `42h XOR 2Ah` | `68`   |
+| C         | `43h`      | `43h XOR 2Ah` | `69`   |
 
-The project does not download or redistribute these tools. Extension bundles
-are discovered automatically; a local TASM cache is extracted into ignored
-`.local/tasm/` on first use. See [tools/README.md](tools/README.md) for overrides.
+This is a reversible teaching example, not secure encryption.
 
-1. Open **Terminal > Run Task > DOS: Check toolchain**.
-2. Press **Ctrl+Shift+B** to assemble and link the starter program.
-3. Run **DOS: Run program**, or **DOS: Verify setup** for the smoke check.
+## Current scope
 
-Expected program output:
+This is a **guided reverse-engineering lab with disclosed source**. The
+reference was authored for this project and its source is included. The
+analysis uses the executable, but prior access to its implementation is
+documented in [target/provenance.md](target/provenance.md).
 
-```text
-8086 DOS Reconstruction
-Toolchain ready.
+| Milestone                                                             | Status           |
+| --------------------------------------------------------------------- | ---------------- |
+| Reference DOS COM executable                                          | Built: 271 bytes |
+| TASM reconstruction                                                   | Built: 250 bytes |
+| Binary identity, strings, and disassembly                             | Recorded         |
+| Execution comparison against the reference and a Python specification | 31/31 passed     |
+| Interactive register and memory trace                                 | Pending          |
+| Case study using an initially unfamiliar binary                       | Future work      |
+
+The reference transforms the input buffer in place and uses an `XLAT` lookup
+table for hexadecimal digits. The reconstruction transforms each byte while
+printing and calculates the digits arithmetically. Their machine code differs;
+their output agrees for the recorded tests.
+
+## Run with GUI Turbo Assembler
+
+You need TASM, TLINK, and a DOS runtime, such as the one provided by your GUI
+Turbo Assembler setup. The GUI workflow does not require the VS Code extension.
+
+1. Open or reload [src/rebuild.asm](src/rebuild.asm) to load the current encoder.
+2. Assemble it with TASM and link a **COM** executable using TLINK's `/t` option.
+3. Run the newly built `REBUILD.COM`, type `ABC`, and press Enter.
+
+In a DOS terminal with the current directory set to `src`, the commands are:
+
+```dos
+tasm /m2 /l rebuild.asm
+tlink /t rebuild.obj
+rebuild.com
 ```
 
-Equivalent commands from a PowerShell terminal at the project root:
+Expected interaction:
+
+```text
+8086 DOS Encoder
+Enter text (max 64 characters): ABC
+Encoded: 6B 68 69
+```
+
+The program accepts one line of up to 64 characters and then exits. Empty
+input produces `Encoded: ` with no bytes. Output uses a single space between
+bytes and no trailing separator. Characters beyond the limit are discarded
+by DOS buffered input until Enter.
+
+Run [target/ENCODE.COM](target/ENCODE.COM) in the same DOS runtime to compare
+the reference. [src/smoke.asm](src/smoke.asm) preserves the earlier
+`Toolchain ready.` setup check.
+
+## Build and verify on Windows
+
+Run these commands from the repository root in PowerShell:
 
 ```powershell
+# Locate TASM, TLINK, and the DOS runner.
 powershell.exe -NoProfile -ExecutionPolicy RemoteSigned -File .\scripts\dev.ps1 -Action check
-powershell.exe -NoProfile -ExecutionPolicy RemoteSigned -File .\scripts\dev.ps1 -Action build
+
+# Build and run the reconstruction.
 powershell.exe -NoProfile -ExecutionPolicy RemoteSigned -File .\scripts\dev.ps1 -Action run
+
+# Inspect the reference and compare both executables.
+powershell.exe -NoProfile -ExecutionPolicy RemoteSigned -File .\scripts\dev.ps1 -Action inspect
 powershell.exe -NoProfile -ExecutionPolicy RemoteSigned -File .\scripts\dev.ps1 -Action verify
 ```
 
-Build output is `build/REBUILD.COM`, with an object file and assembly listing.
-The launcher rebuilds before running, so an earlier executable cannot mask
-an assembly error. Build artifacts and local tools are ignored by Git.
+The launcher uses Windows PowerShell, TASM/TLINK, and MS-DOS Player. It can
+discover tools from installed `xsro.masm-tasm` and `xsro.vscode-dosbox`
+extensions or use explicit local paths. Python 3 is required for `inspect`
+and `verify`; GNU objdump is optional for disassembly. See
+[tools/README.md](tools/README.md) for tool paths and overrides.
 
-## DOS emulator workflow
+In VS Code, **Ctrl+Shift+B** builds the reconstruction. Use **Terminal > Run
+Task** for these tasks:
 
-With `src/rebuild.asm` open, the MASM/TASM extension's **Run ASM Code** and
-**Debug ASM Code** commands use `dosasm.jsonc`. Run builds and executes the
-same `.COM` program; debug opens it in Turbo Debugger's instruction view.
-Symbols/source stepping are not configured for this initial COM build.
+| Task                         | Action                                        |
+| ---------------------------- | --------------------------------------------- |
+| DOS: Check toolchain         | Locate installed tools                        |
+| DOS: Run program             | Build and run the encoder                     |
+| DOS: Verify setup            | Build and run the preserved smoke program     |
+| DOS: Inspect training target | Collect metadata and available disassembly    |
+| DOS: Compare encoder         | Build the reconstruction and run all 31 cases |
+| DOS: Build training target   | Explicitly regenerate the disclosed reference |
 
-`build.bat` is a DOS batch file. Execute it *inside* DOSBox/DOSBox-X with
-TASM and TLINK on the DOS PATH, not directly in a Windows terminal.
+These tasks call the project launcher. The extension's separate Run Assembly
+command is not required for this workflow.
 
-For DOSBox-X's built-in debugger, run **DOS: Debug program**. The launcher
-creates an ignored local config, mounts the project as C: and the TASM
-directory as T:, and uses `DEBUGBOX REBUILD.COM`. A debugger-enabled
-DOSBox-X build is required. This interactive debugger path is separate from
-the console smoke check.
+For a DOS-only build, run `build.bat` from the repository root with TASM and
+TLINK on the DOS PATH. It produces `build/REBUILD.COM`.
+
+### Rebuilding the reference
+
+The reference binary is included so normal build/run/verify operations can
+compare against it. To regenerate it from the disclosed source, use
+`-Action target` or run `build-target.bat` inside DOS. Then run `-Action inspect`
+and review the binary identity in [target/provenance.md](target/provenance.md)
+before recording new comparisons.
+
+The inspection action uses this fixture's code boundary at `0179h` to avoid
+decoding data as instructions. A different target needs its own boundary
+analysis.
+
+## Verification and evidence
+
+The automated suite executes both DOS binaries through MS-DOS Player and
+compares raw output bytes, exit codes, and stderr. It also checks the encoded
+result against a Python specification.
+
+The 31 cases cover empty input, letters, spaces, punctuation, dollar signs,
+digits, all printable ASCII characters, 64-character limits, excess input,
+and deterministic generated cases. See the
+[case descriptions](test/cases.md), [results](test/encoder-results.md), and
+[captured input/output bytes](test/encoder-results.json).
+
+GUI keyboard editing, Ctrl-C handling, other code pages, and high-bit or binary
+input have not been verified by this suite.
+
+| Evidence                                 | File                                                                             |
+| ---------------------------------------- | -------------------------------------------------------------------------------- |
+| Origin, license, and source disclosure   | [target/provenance.md](target/provenance.md)                                     |
+| Hash, size, and extracted strings        | [target/metadata.json](target/metadata.json)                                     |
+| Controlled input/output observations     | [analysis/observation.md](analysis/observation.md)                               |
+| Algorithm and implementation differences | [analysis/algorithm.md](analysis/algorithm.md)                                   |
+| Annotated instruction excerpt            | [analysis/annotated-disassembly.asm](analysis/annotated-disassembly.asm)         |
+| Code-region disassembly                  | [analysis/traces/target-disassembly.txt](analysis/traces/target-disassembly.txt) |
+| Demonstration instructions               | [demo/README.md](demo/README.md)                                                 |
 
 ## Project layout
 
 ```text
-analysis/   Observations, annotated disassembly, algorithm notes, traces
-demo/       Instructions for recording a reproducible demonstration
-scripts/    Windows tool discovery, build, run, and verification launcher
-src/        TASM reconstruction (currently the smoke program)
-target/     Original binary provenance; target selection is pending
-test/       Test cases and recorded results
-tools/      Local toolchain configuration instructions
+analysis/       Observations, algorithm, and disassembly
+build/          Generated executables, objects, and listings (ignored)
+scripts/        Windows launcher, binary inspection, and comparison
+src/            Reconstruction and preserved smoke program
+target/         Reference binary, disclosed source, metadata, and license
+test/           Cases and captured execution results
+tools/          Tool configuration guide
+demo/           Demonstration instructions
 ```
 
-## Next milestone
+## Live debugger (next investigation)
 
-Choose a small training `.COM` binary whose implementation is initially
-unknown to the analyst. Record its origin, distribution terms, size, and
-SHA-256 in `target/provenance.md`. Observe input/output before inspecting its
-instructions, then replace the scaffold using evidence from that binary.
+A live debugger pauses the running DOS program at a breakpoint and lets you
+execute one CPU instruction at a time while inspecting registers and memory.
+For example, with input `ABC`, stepping over the XOR instruction changes the
+first input byte from `41h` (`A`) to `6Bh`. This provides direct evidence of
+how the encoder transforms its input.
 
-Keep hypotheses separate from confirmed findings. Reconstruction compatibility
-requires comparisons against the original; a successful setup check only
-verifies the development tools.
+Use Turbo Debugger to step through `target/ENCODE.COM`. For the recorded
+reference hash, break at `CS:0122h`, inspect the input at `DS:01CEh`, and watch
+the XOR instruction change a byte. Record the actual registers and memory
+values in `analysis/traces/`. This interactive trace is still pending.
 
-## References
+A later independent case study should begin with an unfamiliar executable,
+record prior source access, and derive its behavior from the binary.
 
-- [MASM/TASM project configuration](https://github.com/dosasm/masm-tasm)
-- [DOSBox-X debugger documentation](https://github.com/joncampbell123/dosbox-x/blob/master/README.debugger)
-- [Microsoft MS-DOS programming documentation](https://msarchive.pcjs.org/mspl13/msdos/encyclopedia/section2/)
+## Author and license
 
-## License
+Created by **Engr. Raven C. Magbanua**.
 
-Project-authored code and documentation use the MIT license in `LICENSE.md`.
-Third-party tools and any future target binary retain their own licenses.
+Project code and documentation are released under the
+[MIT License](LICENSE.md). A copy is included with the authored training
+fixture in [target/LICENSE.md](target/LICENSE.md). Third-party tools retain
+their own licenses and are not redistributed by this repository.
