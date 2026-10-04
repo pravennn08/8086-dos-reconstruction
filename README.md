@@ -2,6 +2,8 @@
 
 # 8086 DOS Reconstruction
 
+### A reverse-engineering lab for recovering the behavior of a small DOS binary and rebuilding it in 8086 assembly with Borland Turbo Assembler (TASM).
+
 [![Assembly (8086)](https://img.shields.io/badge/Assembly-8086-red)](src/rebuild.asm)
 [![PowerShell](https://img.shields.io/badge/PowerShell-build_scripts-5391FE)](scripts/dev.ps1)
 [![Python](https://img.shields.io/badge/Python-inspection_%26_tests-3776AB)](scripts/inspect_target.py)
@@ -45,14 +47,14 @@ reference was authored for this project and its source is included. The
 analysis uses the executable, but prior access to its implementation is
 documented in [target/provenance.md](target/provenance.md).
 
-| Milestone                                                             | Status           |
-| --------------------------------------------------------------------- | ---------------- |
-| Reference DOS COM executable                                          | Built: 271 bytes |
-| TASM reconstruction                                                   | Built: 250 bytes |
-| Binary identity, strings, and disassembly                             | Recorded         |
-| Execution comparison against the reference and a Python specification | 31/31 passed     |
-| Interactive register and memory trace | Captured: keyboard-entered ABC |
-| Case study using an initially unfamiliar binary                       | Future work      |
+| Milestone                                                             | Status                         |
+| --------------------------------------------------------------------- | ------------------------------ |
+| Reference DOS COM executable                                          | Built: 271 bytes               |
+| TASM reconstruction                                                   | Built: 250 bytes               |
+| Binary identity, strings, and disassembly                             | Recorded                       |
+| Execution comparison against the reference and a Python specification | 31/31 passed                   |
+| Interactive register and memory trace                                 | Captured: keyboard-entered ABC |
+| Case study using an initially unfamiliar binary                       | Future work                    |
 
 The reference transforms the input buffer in place and uses an `XLAT` lookup
 table for hexadecimal digits. The reconstruction transforms each byte while
@@ -126,9 +128,9 @@ Task** for these tasks:
 | DOS: Inspect training target | Collect metadata and available disassembly    |
 | DOS: Compare encoder         | Build the reconstruction and run all 31 cases |
 | DOS: Build training target   | Explicitly regenerate the disclosed reference |
-| DOS: Debug training target | Open the reference in Turbo Debugger |
-| DOS: Debug program | Build and debug the reconstruction |
-| DOS: Capture debugger trace | Record and check two controlled CPU traces |
+| DOS: Debug training target   | Open the reference in Turbo Debugger          |
+| DOS: Debug program           | Build and debug the reconstruction            |
+| DOS: Capture debugger trace  | Record and check two controlled CPU traces    |
 
 These tasks call the project launcher. The extension's separate Run Assembly
 command is not required for this workflow.
