@@ -1,0 +1,42 @@
+-e 1cc 41 03 41 42 43 0d
+-r ip
+IP 0100  :117
+-g 122
+AX=0000 BX=01CE CX=0003 DX=0000 SP=FFFE BP=0000 SI=0000 DI=0000
+DS=0DF4 ES=0DF4 SS=0DF4 CS=0DF4 IP=0122 NV UP EI PL ZR NA PE NC
+0DF4:0122 80372A            XOR     BYTE PTR [BX],2A                 DS:01CE=41
+-r
+AX=0000 BX=01CE CX=0003 DX=0000 SP=FFFE BP=0000 SI=0000 DI=0000
+DS=0DF4 ES=0DF4 SS=0DF4 CS=0DF4 IP=0122 NV UP EI PL ZR NA PE NC
+0DF4:0122 80372A            XOR     BYTE PTR [BX],2A                 DS:01CE=41
+-d 1cc 1d1
+0DF4:01C0                         -            41 03 41 42             A.AB
+0DF4:01D0  43 0D                  -                        C.
+-t
+AX=0000 BX=01CE CX=0003 DX=0000 SP=FFFE BP=0000 SI=0000 DI=0000
+DS=0DF4 ES=0DF4 SS=0DF4 CS=0DF4 IP=0125 NV UP EI PL NZ NA PO NC
+0DF4:0125 43                INC     BX
+-r
+AX=0000 BX=01CE CX=0003 DX=0000 SP=FFFE BP=0000 SI=0000 DI=0000
+DS=0DF4 ES=0DF4 SS=0DF4 CS=0DF4 IP=0125 NV UP EI PL NZ NA PO NC
+0DF4:0125 43                INC     BX
+-d 1cc 1d1
+0DF4:01C0                         -            41 03 6B 42             A.kB
+0DF4:01D0  43 0D                  -                        C.
+-g 128
+AX=0000 BX=01D1 CX=0000 DX=0000 SP=FFFE BP=0000 SI=0000 DI=0000
+DS=0DF4 ES=0DF4 SS=0DF4 CS=0DF4 IP=0128 NV UP EI PL NZ NA PE NC
+0DF4:0128 BAAD01            MOV     DX,01AD
+-r
+AX=0000 BX=01D1 CX=0000 DX=0000 SP=FFFE BP=0000 SI=0000 DI=0000
+DS=0DF4 ES=0DF4 SS=0DF4 CS=0DF4 IP=0128 NV UP EI PL NZ NA PE NC
+0DF4:0128 BAAD01            MOV     DX,01AD
+-d 1cc 1d1
+0DF4:01C0                         -            41 03 6B 68             A.kh
+0DF4:01D0  69 0D                  -                        i.
+-g
+
+Encoded: 6B 68 69
+
+Program terminated normally (0000)
+-q

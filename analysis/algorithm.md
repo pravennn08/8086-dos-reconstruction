@@ -49,4 +49,6 @@ hex-print routine.
 
 Matching captured outputs establish agreement for the tested cases. Interactive
 editing, Ctrl-C, other code pages, and high-bit input remain unverified.
-Runtime register/memory trace claims are deferred until a debugger session.
+A keyboard-entered [live debugger session](traces/turbo-session.md) now
+captures the first in-place XOR transition. Separate [controlled traces](traces/debugger-results.md)
+record loop completion and the empty-input branch with explicitly seeded input.

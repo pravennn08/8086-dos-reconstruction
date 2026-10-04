@@ -50,10 +50,18 @@ python.exe .\scripts\inspect_target.py --objdump 'C:\MinGW\bin\objdump.exe' --co
 for DOS COM programs. Without objdump, the metadata inspection still works;
 Turbo Debugger can be used to inspect instructions interactively.
 
-`-Action debug` configures DOSBox-X to open `DEBUGBOX REBUILD.COM`. Its
-interactive launch has not been verified by the automated console tests.
-To follow the reference-byte investigation, load `target/ENCODE.COM` in
-Turbo Debugger as described in `demo/README.md`.
+`-Action debug-target` opens the reference in Turbo Debugger (`TD.EXE`)
+inside DOSBox-X. `-Action debug` builds and opens the reconstruction. Both
+use assembler startup (`-l`) and ignore old saved program state (`-ji`).
+TD's working files stay in the ignored `.local/TD/` directory. The expected
+no-symbol-table notice can be dismissed to inspect the COM's instructions.
+
+`-Action trace` requires only Python 3 and DOSBox-X with its bundled DOS
+DEBUG command. It checks two controlled instruction traces and writes the
+captured evidence to `analysis/traces/`. This action does not require TASM
+or MS-DOS Player. It is pinned to the training fixture's hash and addresses.
+Interactive Turbo Debugger keyboard entry and single stepping have been
+captured separately; follow `demo/README.md` to repeat the session.
 
 ## Troubleshooting
 

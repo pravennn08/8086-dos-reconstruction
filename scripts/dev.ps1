@@ -1,6 +1,6 @@
 [CmdletBinding()]
 param(
-    [ValidateSet('check', 'build', 'run', 'verify', 'debug', 'target', 'inspect', 'smoke')]
+    [ValidateSet('check', 'build', 'run', 'verify', 'debug', 'target', 'inspect', 'smoke', 'debug-target', 'trace')]
     [string]$Action = 'check',
     [string]$TasmDirectory = $env:TASM_DIR,
     [string]$MsdosPlayer = $env:MSDOS_PLAYER,
@@ -38,16 +38,65 @@ function Invoke-DosTool {
     }
 }
 
+function Start-TurboDebugger {
+    param([ValidateSet('target', 'rebuild')][string]$Mode)
+    if (-not $DosboxX -or -not (Test-Path -LiteralPath $DosboxX -PathType Leaf)) {
+        throw 'DOSBox-X was not found. Set DOSBOX_X or install xsro.vscode-dosbox.'
+    }
+    $debugger = Join-Path $TasmDirectory 'TD.EXE'
+    if (-not (Test-Path -LiteralPath $debugger -PathType Leaf)) {
+        throw 'Turbo Debugger TD.EXE was not found beside TASM. Set TASM_DIR to a complete tool directory.'
+    }
+    $relativeProgram = 'build\REBUILD.COM'
+    if ($Mode -eq 'target') { $relativeProgram = 'target\ENCODE.COM' }
+    if (-not (Test-Path -LiteralPath (Join-Path $projectRoot $relativeProgram) -PathType Leaf)) {
+        throw ('Program is missing: ' + $relativeProgram)
+    }
+    $sessionDirectory = Join-Path $localDirectory 'TD'
+    New-Item -ItemType Directory -Path $sessionDirectory -Force | Out-Null
+    $configPath = Join-Path $sessionDirectory ('debug-' + $Mode + '.conf')
+    $configText = @"
+[sdl]
+fullscreen=false
+[cpu]
+core=normal
+cycles=fixed 3000
+[autoexec]
+mount c "$projectRoot"
+mount t "$TasmDirectory"
+mount d "$sessionDirectory"
+path t:\;z:\;z:\bin
+d:
+td -l -ji c:\$relativeProgram
+"@
+    Set-Content -LiteralPath $configPath -Value $configText -Encoding ASCII
+    # The requested live-debugger action opens an interactive window.
+    $debugProcess = Start-Process -FilePath $DosboxX -ArgumentList @('-noconsole', '-conf', ('"{0}"' -f $configPath)) -WorkingDirectory $sessionDirectory -WindowStyle Normal -PassThru
+    Write-Host ('Opened Turbo Debugger for ' + $relativeProgram + '; PID ' + $debugProcess.Id)
+    Write-Host 'A no-symbol-table notice is expected for the reference COM. Dismiss it to use the CPU view.'
+}
+
 try {
     if ($Action -eq 'inspect') {
         & python.exe (Join-Path $projectRoot 'scripts\inspect_target.py') --code-end 0x179
         if ($LASTEXITCODE -ne 0) { throw 'Target inspection failed.' }
         exit 0
     }
+    if ($Action -eq 'trace') {
+        if (-not $DosboxX) {
+            $DosboxX = Find-ExtensionFile 'xsro.vscode-dosbox' 'emu\dosbox_x\win32-x64\dosbox-x.exe'
+        }
+        if (-not $DosboxX -or -not (Test-Path -LiteralPath $DosboxX -PathType Leaf)) {
+            throw 'DOSBox-X was not found. Set DOSBOX_X before capturing debugger traces.'
+        }
+        & python.exe (Join-Path $projectRoot 'scripts\trace_debugger.py') --dosbox $DosboxX
+        if ($LASTEXITCODE -ne 0) { throw 'Debugger trace failed; no new verified report was saved.' }
+        exit 0
+    }
     if (-not $MsdosPlayer) {
         $MsdosPlayer = Find-ExtensionFile 'xsro.vscode-dosbox' 'emu\msdos_player\win32-x64\msdos.exe'
     }
-    if (-not $MsdosPlayer -or -not (Test-Path -LiteralPath $MsdosPlayer -PathType Leaf)) {
+    if ($Action -ne 'debug-target' -and (-not $MsdosPlayer -or -not (Test-Path -LiteralPath $MsdosPlayer -PathType Leaf))) {
         throw 'MS-DOS Player was not found. Install xsro.vscode-dosbox or set MSDOS_PLAYER to msdos.exe.'
     }
 
@@ -82,11 +131,11 @@ try {
     }
 
     $TasmDirectory = (Resolve-Path -LiteralPath $TasmDirectory).Path
-    $MsdosPlayer = (Resolve-Path -LiteralPath $MsdosPlayer).Path
+    if ($Action -ne 'debug-target') { $MsdosPlayer = (Resolve-Path -LiteralPath $MsdosPlayer).Path }
     $assembler = Join-Path $TasmDirectory 'TASM.EXE'
     $linker = Join-Path $TasmDirectory 'TLINK.EXE'
     foreach ($tool in @($assembler, $linker)) {
-        if (-not (Test-Path -LiteralPath $tool -PathType Leaf)) {
+        if ($Action -ne 'debug-target' -and -not (Test-Path -LiteralPath $tool -PathType Leaf)) {
             throw ('Required tool is missing: ' + $tool)
         }
     }
@@ -104,6 +153,11 @@ try {
             Write-Host 'DOSBox-X was not found; set DOSBOX_X before using interactive debugging.'
         }
         Write-Host 'Build/run tools located. Use -Action smoke for setup, or -Action verify for encoder comparison.'
+        exit 0
+    }
+
+    if ($Action -eq 'debug-target') {
+        Start-TurboDebugger -Mode target
         exit 0
     }
 
@@ -172,28 +226,7 @@ try {
     }
 
     if ($Action -eq 'debug') {
-        if (-not $DosboxX -or -not (Test-Path -LiteralPath $DosboxX -PathType Leaf)) {
-            throw 'Interactive debugger unavailable. Install xsro.vscode-dosbox or set DOSBOX_X.'
-        }
-        New-Item -ItemType Directory -Path $localDirectory -Force | Out-Null
-        $configPath = Join-Path $localDirectory 'debug.conf'
-        $configText = @"
-[sdl]
-fullscreen=false
-[cpu]
-cycles=auto
-[autoexec]
-mount c "$projectRoot"
-mount t "$TasmDirectory"
-path t:\;z:\
-c:
-cd build
-DEBUGBOX REBUILD.COM
-"@
-        Set-Content -LiteralPath $configPath -Value $configText -Encoding ASCII
-        # This action explicitly opens an interactive debugger for the user.
-        Start-Process -FilePath $DosboxX -ArgumentList @('-console', '-conf', ('"{0}"' -f $configPath)) -WorkingDirectory $projectRoot -WindowStyle Normal | Out-Null
-        Write-Host 'Opened DOSBox-X. Debugger availability depends on the installed DOSBox-X build.'
+        Start-TurboDebugger -Mode rebuild
     }
 } catch {
     Write-Error $_ -ErrorAction Continue

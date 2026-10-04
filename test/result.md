@@ -44,3 +44,14 @@ scratch fixture: failed reconstruction and target builds return exit code 1,
 clear stale generated outputs, and preserve unrelated files and the existing
 reference binary. Python syntax, VS Code JSON, evidence hashes, and README
 file links were checked successfully.
+
+## Live debugger milestone
+
+Keyboard-entered ABC was captured in Turbo Debugger 5.0 inside DOSBox-X
+0.83.18. Before/after screenshots show IP 0122h -> 0125h and the memory byte
+41h -> 6Bh after a single step. See the
+[interactive session](../analysis/traces/turbo-session.md).
+
+The separate [controlled trace report](../analysis/traces/debugger-results.md)
+checks ABC and the empty-input branch. Its seeded input and skipped keyboard
+call are documented explicitly; it is not presented as GUI keyboard testing.

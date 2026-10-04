@@ -1,0 +1,20 @@
+-e 1cc 41 00 0d 00 00 00
+-r ip
+IP 0100  :117
+-g 128
+AX=0000 BX=01CE CX=0000 DX=0000 SP=FFFE BP=0000 SI=0000 DI=0000
+DS=0DF4 ES=0DF4 SS=0DF4 CS=0DF4 IP=0128 NV UP EI PL ZR NA PE NC
+0DF4:0128 BAAD01            MOV     DX,01AD
+-r
+AX=0000 BX=01CE CX=0000 DX=0000 SP=FFFE BP=0000 SI=0000 DI=0000
+DS=0DF4 ES=0DF4 SS=0DF4 CS=0DF4 IP=0128 NV UP EI PL ZR NA PE NC
+0DF4:0128 BAAD01            MOV     DX,01AD
+-d 1cc 1d1
+0DF4:01C0                         -            41 00 0D 00             A...
+0DF4:01D0  00 00                  -                        ..
+-g
+
+Encoded: 
+
+Program terminated normally (0000)
+-q
